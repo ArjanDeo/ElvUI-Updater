@@ -73,6 +73,7 @@ namespace ElvUI_Updater.Main
 			HttpResponseMessage response = await client.GetAsync(url);
 			if (response.IsSuccessStatusCode)
 			{
+				string elvuiZip = $"./elvui-{v}.zip";
 
 				byte[] fileBytes = await response.Content.ReadAsByteArrayAsync();
 
@@ -85,9 +86,11 @@ namespace ElvUI_Updater.Main
 				}
 				else
 				{
-					File.WriteAllBytes($"./elvui-{v}.zip", fileBytes);
-					System.IO.Compression.ZipFile.ExtractToDirectory($"./elvui-{v}.zip", addonsPath, System.Text.Encoding.UTF8, true);
+					File.WriteAllBytes(elvuiZip, fileBytes);
+					System.IO.Compression.ZipFile.ExtractToDirectory(elvuiZip, addonsPath, System.Text.Encoding.UTF8, true);
+					File.Delete(elvuiZip);
 					Console.WriteLine("File downloaded successfully.");
+					Console.ReadKey();
 				}
 			}
 			else
