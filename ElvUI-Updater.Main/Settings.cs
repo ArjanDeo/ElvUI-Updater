@@ -3,29 +3,23 @@
     public class Settings
     {
         public string AddonsFolderPath { get; set; }
-    
+
         public void SaveSettings()
         {
-            string content = AddonsFolderPath;
-            File.WriteAllText("settings.txt", content);
+            File.WriteAllText("settings.txt", AddonsFolderPath);
         }
-
 
         public bool LoadSettings()
         {
             if (File.Exists("settings.txt"))
             {
                 string[] lines = File.ReadAllLines("settings.txt");
-                AddonsFolderPath = lines[0];                  
-               
+                if (lines.Length > 0)
+                {
+                    AddonsFolderPath = lines[0];
+                    return true;
+                }
             }
-            else
-            {
-                Console.WriteLine("Error: Settings file not found.");
-                return false;
-            }
-
-
             return false;
         }
     }

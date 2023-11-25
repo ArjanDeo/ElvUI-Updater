@@ -5,11 +5,7 @@ namespace ElvUI_Updater.Main
 {
     public class Program
     {
-        private static readonly HttpClient client;
-        static Program()
-        {
-            client = new();
-        }
+        private static readonly HttpClient client = new();
 
         static async Task Main()
         {
@@ -23,18 +19,11 @@ namespace ElvUI_Updater.Main
                 settings.AddonsFolderPath = addonsPath;
                 settings.SaveSettings();
             }
-          
-            try
-            {
-                await GetElvUIAPIAsync(settings.AddonsFolderPath);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An exception occurred: " + ex.Message);
-            }
+
+            await UpdateElvUIAsync(settings);
         }
-        
-        public static async Task GetElvUIAPIAsync(string addonsPath)
+
+        public static async Task UpdateElvUIAsync(Settings settings)
         {
             try
             {
@@ -42,59 +31,61 @@ namespace ElvUI_Updater.Main
                 response.EnsureSuccessStatusCode();
 
                 string responseBody = await response.Content.ReadAsStringAsync();
-                var x = JsonConvert.DeserializeObject<ElvUIModel>(responseBody);
+                var responseData = JsonConvert.DeserializeObject<ElvUIModel>(responseBody);
 
-                await DownloadAndExtractElvUIAsync(addonsPath, x.Url, x.Version);
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine($"HTTP request exception: {ex.Message}");
+                string tocFilePath = $"{settings.AddonsFolderPath}/ElvUI/ElvUI_Mainline.toc";
+
+                if (File.Exists(tocFilePath))
+                {
+                    string vLine = File.ReadLines(tocFilePath).Skip(3).Take(1).FirstOrDefault();
+
+                    if (vLine != null)
+                    {
+                        string installedVersion = vLine.Split(':')[1]?.Trim();
+
+                        if (installedVersion == responseData.Version)
+                        {
+                            Console.WriteLine($"You already have the latest version of ElvUI ({responseData.Version}).");
+                            Console.ReadKey();
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Couldn't find ElvUI. (Check if your settings have the correct path)");
+                    Console.ReadKey();
+                    return;
+                }
+
+                await DownloadAndExtractElvUIAsync(settings.AddonsFolderPath, responseData.Url, responseData.Version);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An exception occurred: {ex.Message}");
             }
         }
-      
+
         public static async Task DownloadAndExtractElvUIAsync(string addonsPath, string url, string v)
         {
-            HttpResponseMessage response = await client.GetAsync(url);
-            if (response.IsSuccessStatusCode)
+            try
             {
+                HttpResponseMessage response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
                 string elvuiZip = $"./elvui-{v}.zip";
-
                 byte[] fileBytes = await response.Content.ReadAsByteArrayAsync();
-                string vLine = "";
-                try
-                {
-                    vLine = File.ReadLines($"{addonsPath}/ElvUI/ElvUI_Mainline.toc").Skip(3).Take(1).First();
-                }
-                catch
-                {
-                    Console.WriteLine("Couldn't find ElvUI. (Check if your settings has the correct path)");
-                    Console.ReadKey();
-                    Environment.Exit(0);
-                }
 
-                bool isSameVersion = vLine.Contains(v);
-                if (isSameVersion)
-                {
-                    Console.WriteLine($"ElvUI is up to date. (version {v})");
-                    Console.ReadKey();
-                }
-                else
-                {
-                    File.WriteAllBytes(elvuiZip, fileBytes);
-                    System.IO.Compression.ZipFile.ExtractToDirectory(elvuiZip, addonsPath, System.Text.Encoding.UTF8, true);
-                    File.Delete(elvuiZip);
-                    Console.WriteLine($"ElvUI successfully updated to version {v}.\nPress any key to exit.");
-                    Console.ReadKey();
-                }
+                File.WriteAllBytes(elvuiZip, fileBytes);
+                System.IO.Compression.ZipFile.ExtractToDirectory(elvuiZip, addonsPath, true);
+                File.Delete(elvuiZip);
+                Console.WriteLine($"ElvUI successfully updated to version {v}.\nPress any key to exit.");
+                Console.ReadKey();
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Failed to download ElvUI {v}. Status code: {response.StatusCode}");
+                Console.WriteLine($"Failed to download or extract ElvUI. {ex.Message}");
             }
-        }      
+        }
     }
 }
