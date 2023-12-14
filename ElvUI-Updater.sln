@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElvUI-Updater.Main", "ElvUI-Updater.Main\ElvUI-Updater.Main.csproj", "{63D7F70A-15BD-4D1E-B404-D4E5C70971D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElvUI-Updater.Main", "ElvUI-Updater.Main\ElvUI-Updater.Main.csproj", "{63D7F70A-15BD-4D1E-B404-D4E5C70971D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPF", "WPF\WPF.csproj", "{773CBE63-7DB1-44D3-9BC2-9389B6B7B16C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{63D7F70A-15BD-4D1E-B404-D4E5C70971D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63D7F70A-15BD-4D1E-B404-D4E5C70971D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63D7F70A-15BD-4D1E-B404-D4E5C70971D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{773CBE63-7DB1-44D3-9BC2-9389B6B7B16C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{773CBE63-7DB1-44D3-9BC2-9389B6B7B16C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{773CBE63-7DB1-44D3-9BC2-9389B6B7B16C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{773CBE63-7DB1-44D3-9BC2-9389B6B7B16C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
