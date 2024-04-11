@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using ElvUI_Updater.Main.Models;
+using System.IO.Compression;
 
 namespace ElvUI_Updater.Main
 {
@@ -9,14 +10,14 @@ namespace ElvUI_Updater.Main
 
         static async Task Main()
         {
+            Console.Title = "ElvUI Updater";
+            Console.ForegroundColor = ConsoleColor.Green;
             Settings settings = new();
 
             if (!settings.LoadSettings())
             {
                 Console.WriteLine("Please enter the path to your addons folder:");
-                string addonsPath = Console.ReadLine();
-
-                settings.AddonsFolderPath = addonsPath;
+                settings.AddonsFolderPath = Console.ReadLine();                
                 settings.SaveSettings();
             }
 
@@ -41,9 +42,9 @@ namespace ElvUI_Updater.Main
 
                     if (vLine != null)
                     {
-                        string installedVersion = vLine.Split(':')[1]?.Trim();
+                        vLine = vLine.Split(':')[1]?.Trim();
 
-                        if (installedVersion == responseData.Version)
+                        if (vLine == responseData.Version)
                         {
                             Console.WriteLine($"You already have the latest version of ElvUI ({responseData.Version}).");
                             Console.ReadKey();
@@ -53,7 +54,7 @@ namespace ElvUI_Updater.Main
                 }
                 else
                 {
-                    Console.WriteLine("Couldn't find ElvUI. (Check if your settings have the correct path)");
+                    Console.WriteLine("Couldn't find ElvUI in your addons folder. (Check if your settings has the correct path)");
                     Console.ReadKey();
                     return;
                 }
@@ -62,7 +63,8 @@ namespace ElvUI_Updater.Main
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An exception occurred: {ex.Message}");
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                Console.WriteLine("If the issue persists, please open an issue on https://github.com/ArjanDeo/ElvUI-Updater with a screenshot of this console window.");
             }
         }
 
@@ -77,8 +79,9 @@ namespace ElvUI_Updater.Main
                 byte[] fileBytes = await response.Content.ReadAsByteArrayAsync();
 
                 File.WriteAllBytes(elvuiZip, fileBytes);
-                System.IO.Compression.ZipFile.ExtractToDirectory(elvuiZip, addonsPath, true);
+                ZipFile.ExtractToDirectory(elvuiZip, addonsPath, true);
                 File.Delete(elvuiZip);
+
                 Console.WriteLine($"ElvUI successfully updated to version {v}.\nPress any key to exit.");
                 Console.ReadKey();
             }
