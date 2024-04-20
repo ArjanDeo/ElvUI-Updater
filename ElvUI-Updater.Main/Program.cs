@@ -42,11 +42,12 @@ namespace ElvUI_Updater.Main
 
                     if (vLine != null)
                     {
-                        vLine = vLine.Split(':')[1]?.Trim();
+                        vLine = vLine.Split('v')[1]?.Trim();
+
 
                         if (vLine == responseData.Version)
                         {
-                            Console.WriteLine($"You already have the latest version of ElvUI ({responseData.Version}).");
+                            Console.WriteLine($"You already have the latest version of ElvUI (v{responseData.Version}).");
                             Console.ReadKey();
                             return;
                         }
