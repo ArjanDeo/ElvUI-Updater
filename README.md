@@ -1,6 +1,7 @@
 # ElvUI-Updater
+[![CI](https://github.com/ArjanDeo/ElvUI-Updater/actions/workflows/build.yml/badge.svg)](https://github.com/ArjanDeo/ElvUI-Updater/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/ArjanDeo/ElvUI-Updater)](https://github.com/ArjanDeo/ElvUI-Updater/releases)
+[![License](https://img.shields.io/github/license/ArjanDeo/ElvUI-Updater)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/ArjanDeo/ElvUI-Updater)](https://github.com/ArjanDeo/ElvUI-Updater)
 
-<h3>A simple program to keep ElvUI up to date.</h3>
-  This program aims to simplify the installation (and updating) of <a href="https://tukui.org/elvui" target="_blank" text-decoration="none">ElvUI</a>. bringing a one-click approach to keeping ElvUI updated simply and quickly.</p>
-<h1>Install</h3>
-<p>There are no specific install instructions. Just note that as of version 2.0.0, this program only supports Windows OS.</p>
+A cross-platform ElvUI updater written in C++.
