@@ -23,26 +23,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt update
           sudo apt install -y ninja-build clang
 
+
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
           brew install ninja llvm
 
+
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         run: |
-          choco install ninja
+          choco install ninja -y
+
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
 
-      - name: Configure
+
+      - name: Configure (macOS LLVM)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          cmake -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER="$(brew --prefix llvm)/bin/clang" \
+            -DCMAKE_CXX_COMPILER="$(brew --prefix llvm)/bin/clang++" \
+            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+
+      - name: Configure (Linux/Windows)
+        if: runner.os != 'macOS'
         shell: bash
         run: |
           cmake -B build \
@@ -50,13 +68,35 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
+
       - name: Build
         shell: bash
         run: |
           cmake --build build --config Release
+
+
+      - name: Package
+        shell: bash
+        run: |
+          mkdir package
+
+          cp build/ElvUI-Updater* package/
+
+          if [ -f README.md ]; then
+            cp README.md package/
+          fi
+
+          if [ -f LICENSE.txt ]; then
+            cp LICENSE.txt package/
+          fi
+
+          cd package
+
+          zip -r ../ElvUI-Updater-${{ runner.os }}.zip .
+
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ElvUI-Updater-${{ runner.os }}
-          path: |
-            build/ElvUI-Updater*
+          path: ElvUI-Updater-${{ runner.os }}.zip

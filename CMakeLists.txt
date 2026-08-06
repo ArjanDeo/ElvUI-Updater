@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(CURL CONFIG REQUIRED)
+find_package(libzip CONFIG REQUIRED)
 
 file(GLOB_RECURSE SOURCES
     src/*.cpp
@@ -24,4 +26,6 @@ target_include_directories(ElvUI-Updater
 target_link_libraries(ElvUI-Updater
     PRIVATE
     nlohmann_json::nlohmann_json
+    CURL::libcurl
+    libzip::zip
 )

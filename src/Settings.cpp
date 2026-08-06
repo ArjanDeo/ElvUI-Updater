@@ -86,5 +86,5 @@ bool Settings::isValidWowDirectory(const std::string& path)
         return false;
 
     std::filesystem::path p(path);
-    return std::filesystem::exists(p / "Interface" / "AddOns");
+    return std::filesystem::exists(p / "_retail_");
 }
