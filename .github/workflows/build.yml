@@ -54,3 +54,9 @@ jobs:
         shell: bash
         run: |
           cmake --build build --config Release
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ElvUI-Updater-${{ runner.os }}
+          path: |
+            build/ElvUI-Updater*
