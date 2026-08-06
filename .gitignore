@@ -12,6 +12,7 @@ CMakeFiles/
 cmake_install.cmake
 CTestTestfile.cmake
 Makefile
+CMakeUserPresets.json
 
 # vcpkg generated files
 vcpkg_installed/

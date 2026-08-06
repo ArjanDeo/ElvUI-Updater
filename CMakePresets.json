@@ -9,32 +9,18 @@
       }
     },
     {
-      "name": "llvm-clang",
-      "displayName": "LLVM Clang",
+      "name": "default",
+      "displayName": "Default",
       "inherits": "vcpkg",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "environment": {
-        "VCPKG_ROOT": "/Users/Arjan/Programming/vcpkg"
-      },
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "/opt/homebrew/opt/llvm/bin/clang",
-        "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++"
-      }
+      "binaryDir": "${sourceDir}/build/${presetName}"
     },
     {
-      "name": "llvm-clang-release",
-      "displayName": "LLVM Clang Release",
-      "inherits": "vcpkg",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "environment": {
-        "VCPKG_ROOT": "/Users/Arjan/Programming/vcpkg"
-      },
+      "name": "release",
+      "displayName": "Release",
+      "inherits": "default",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_C_COMPILER": "/opt/homebrew/opt/llvm/bin/clang",
-        "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ]
