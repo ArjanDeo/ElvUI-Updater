@@ -1,13 +1,12 @@
-name: Build
+name: Release
 
 on:
   push:
-    branches:
-      - "**"
-    tags-ignore:
+    tags:
       - "v*"
 
-  pull_request:
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -82,18 +81,12 @@ jobs:
         run: |
           mkdir package
 
-          cp build/ElvUI-Updater* package/
+          find build -name "ElvUI-Updater*" -exec cp {} package/ \;
 
-          if [ -f README.md ]; then
-            cp README.md package/
-          fi
-
-          if [ -f LICENSE.txt ]; then
-            cp LICENSE.txt package/
-          fi
+          cp README.md package/
+          cp LICENSE.txt package/
 
           cd package
-
           zip -r ../ElvUI-Updater-${{ runner.os }}.zip .
 
 
@@ -102,3 +95,23 @@ jobs:
         with:
           name: ElvUI-Updater-${{ runner.os }}
           path: ElvUI-Updater-${{ runner.os }}.zip
+
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            artifacts/**/*.zip
