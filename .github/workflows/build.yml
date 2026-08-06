@@ -43,12 +43,14 @@ jobs:
         uses: lukka/run-vcpkg@v11
 
       - name: Configure
+        shell: bash
         run: |
           cmake -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake
+            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build
+        shell: bash
         run: |
           cmake --build build --config Release
