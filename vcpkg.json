@@ -1,7 +1,0 @@
-{
-  "dependencies": [
-    "curl",
-    "nlohmann-json",
-    "libzip"
-  ]
-}
