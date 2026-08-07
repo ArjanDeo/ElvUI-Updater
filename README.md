@@ -59,7 +59,10 @@ The project depends on:
 - libzip
 
 These dependencies are declared in [vcpkg.json](vcpkg.json) and linked from [CMakeLists.txt](CMakeLists.txt).
-
+They can be installed in vcpkg's Manifest mode in the project directory.
+```bash
+vcpkg install
+```
 ## CI/CD
 
 GitHub Actions workflows are included for automated building and release packaging:
