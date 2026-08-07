@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/ArjanDeo/ElvUI-Updater/actions/workflows/build.yml/badge.svg)](https://github.com/ArjanDeo/ElvUI-Updater/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/release/ArjanDeo/ElvUI-Updater)](https://github.com/ArjanDeo/ElvUI-Updater/releases)
-[![License](https://img.shields.io/github/license/ArjanDeo/ElvUI-Updater)](LICENSE)
+[![License](https://img.shields.io/github/license/ArjanDeo/ElvUI-Updater)](LICENSE.MD)
 [![Stars](https://img.shields.io/github/stars/ArjanDeo/ElvUI-Updater)](https://github.com/ArjanDeo/ElvUI-Updater)
 
 ElvUI-Updater is a small cross-platform C++ application that checks the latest ElvUI release from the TukUI API, compares it to the version installed in your World of Warcraft add-ons folder, and installs or updates ElvUI automatically.
