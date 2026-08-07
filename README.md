@@ -14,7 +14,7 @@ ElvUI-Updater is a small cross-platform C++ application that checks the latest E
 - Reads the installed version from the ElvUI TOC file
 - Downloads and extracts the latest package
 - Removes old ElvUI folders before reinstalling
-- Supports Windows, MacOS, and Linux!
+- Supports Windows, MacOS (Apple Silicon), and Linux!
 
 ## Requirements
 
