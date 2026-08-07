@@ -51,6 +51,9 @@ jobs:
             -DCMAKE_CXX_COMPILER="$(brew --prefix llvm)/bin/clang++" \
             -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
             -DVCPKG_TARGET_TRIPLET=arm64-osx
+      - name: Setup MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
       - name: Configure (Windows)
         if: runner.os == 'Windows'
         shell: bash
