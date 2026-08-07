@@ -25,10 +25,6 @@ jobs:
           - os: macos-latest
             name: macos-arm64
 
-          - os: macos-13
-            name: macos-x64
-
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
