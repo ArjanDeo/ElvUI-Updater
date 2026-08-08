@@ -26,6 +26,10 @@ jobs:
             name: macos-arm64
 
     steps:
+      # ------------------------------------------------------------
+      # Checkout
+      # ------------------------------------------------------------
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -48,7 +52,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          choco install zip -y
+          choco install ninja llvm zip -y
 
       # ------------------------------------------------------------
       # vcpkg
@@ -76,12 +80,21 @@ jobs:
 
       - name: Configure (Windows)
         if: runner.os == 'Windows'
-        shell: cmd
+        shell: powershell
         run: |
-          cmake -B build ^
-            -G "Visual Studio 17 2022" ^
-            -A x64 ^
-            -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" ^
+          $llvm = "C:\Program Files\LLVM\bin"
+
+          if (-not (Test-Path "$llvm\clang-cl.exe")) {
+            Write-Error "clang-cl.exe was not found at $llvm"
+            exit 1
+          }
+
+          cmake -B build `
+            -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_C_COMPILER="$llvm\clang-cl.exe" `
+            -DCMAKE_CXX_COMPILER="$llvm\clang-cl.exe" `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" `
             -DVCPKG_TARGET_TRIPLET=x64-windows-static
 
       - name: Configure (Linux)
@@ -93,6 +106,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
             -DVCPKG_TARGET_TRIPLET=x64-linux \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++"
 
       # ------------------------------------------------------------
@@ -102,10 +117,10 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          cmake --build build --config Release
+          cmake --build build --config Release --parallel
 
       # ------------------------------------------------------------
-      # Package
+      # Package Windows
       # ------------------------------------------------------------
 
       - name: Package (Windows)
@@ -115,7 +130,10 @@ jobs:
           New-Item -ItemType Directory -Force -Path package | Out-Null
 
           # Find executable
-          $exe = Get-ChildItem -Path build -Recurse -Filter "ElvUI-Updater.exe" |
+          $exe = Get-ChildItem `
+            -Path build `
+            -Recurse `
+            -Filter "ElvUI-Updater.exe" |
             Select-Object -First 1
 
           if (-not $exe) {
@@ -123,33 +141,90 @@ jobs:
             exit 1
           }
 
-          Copy-Item $exe.FullName package/
+          Write-Host "Found executable:"
+          Write-Host $exe.FullName
 
-          # Copy required DLLs from vcpkg
-          $binDir = Join-Path $env:GITHUB_WORKSPACE "vcpkg_installed\x64-windows-static\bin"
+          Copy-Item $exe.FullName package\
+
+          # --------------------------------------------------------
+          # Copy vcpkg runtime DLLs
+          # --------------------------------------------------------
+
+          $binDir = Join-Path $env:GITHUB_WORKSPACE `
+            "vcpkg_installed\x64-windows-static\bin"
+
+          Write-Host "Checking vcpkg bin directory:"
+          Write-Host $binDir
 
           if (Test-Path $binDir) {
-            Copy-Item "$binDir\*.dll" package/ -ErrorAction SilentlyContinue
+            $dlls = Get-ChildItem $binDir -Filter "*.dll"
+
+            if ($dlls.Count -gt 0) {
+              Write-Host "Copying vcpkg DLLs:"
+              $dlls | ForEach-Object {
+                Write-Host $_.Name
+                Copy-Item $_.FullName package\
+              }
+            }
+            else {
+              Write-Host "No vcpkg DLLs found."
+            }
+          }
+          else {
+            Write-Host "vcpkg bin directory does not exist."
           }
 
-          # Copy README / LICENSE
+          # --------------------------------------------------------
+          # Copy any DLLs produced/downloaded by the project
+          # --------------------------------------------------------
+
+          $buildDlls = Get-ChildItem `
+            -Path build `
+            -Recurse `
+            -Filter "*.dll" `
+            -ErrorAction SilentlyContinue
+
+          if ($buildDlls) {
+            Write-Host "Copying DLLs from build directory:"
+
+            $buildDlls | ForEach-Object {
+              Write-Host $_.FullName
+              Copy-Item $_.FullName package\ -Force
+            }
+          }
+
+          # --------------------------------------------------------
+          # README / LICENSE
+          # --------------------------------------------------------
+
           if (Test-Path README.md) {
-            Copy-Item README.md package/
+            Copy-Item README.md package\
           }
 
           if (Test-Path LICENSE.txt) {
-            Copy-Item LICENSE.txt package/
+            Copy-Item LICENSE.txt package\
           }
 
-          # Show package contents
+          # --------------------------------------------------------
+          # Show package
+          # --------------------------------------------------------
+
+          Write-Host ""
           Write-Host "Package contents:"
           Get-ChildItem package
 
+          # --------------------------------------------------------
           # Create archive
+          # --------------------------------------------------------
+
           Compress-Archive `
             -Path "package\*" `
             -DestinationPath "ElvUI-Updater-${{ github.ref_name }}-${{ matrix.name }}.zip" `
             -Force
+
+      # ------------------------------------------------------------
+      # Package Linux/macOS
+      # ------------------------------------------------------------
 
       - name: Package (Linux/macOS)
         if: runner.os != 'Windows'
@@ -157,7 +232,10 @@ jobs:
         run: |
           mkdir -p package
 
-          find build -type f -name "ElvUI-Updater*" -exec cp {} package/ \;
+          find build \
+            -type f \
+            -name "ElvUI-Updater*" \
+            -exec cp {} package/ \;
 
           if [ -f README.md ]; then
             cp README.md package/
@@ -166,6 +244,9 @@ jobs:
           if [ -f LICENSE.txt ]; then
             cp LICENSE.txt package/
           fi
+
+          echo "Package contents:"
+          ls -la package
 
           cd package
 
@@ -183,9 +264,9 @@ jobs:
           name: ElvUI-Updater-${{ github.ref_name }}-${{ matrix.name }}
           path: ElvUI-Updater-${{ github.ref_name }}-${{ matrix.name }}.zip
 
-  # --------------------------------------------------------------
+  # ================================================================
   # GitHub Release
-  # --------------------------------------------------------------
+  # ================================================================
 
   release:
     name: Create GitHub Release
